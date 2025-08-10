@@ -1,4 +1,13 @@
 {
+  "sepolia": {
+    "chainId": 11155111,
+    "entryPoint": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+    "factory": "0xB8D779eeEF173c6dBC3a28f0Dec73e48cBE6411C",
+    "sessionKeyModule": "0x5d3bd2E5D1ac904E5B47e1292E8b47E3358d90Fa",
+    "deploymentBlock": 8956118,
+    "deploymentDate": "2025-08-10",
+    "deployer": "0xB1Fd8ccd8b66a3DeDcD5fFef1Edb22fbCA01c66b"
+  },
   "xlayer": {
     "chainId": 196,
     "entryPoint": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
@@ -11,10 +20,10 @@
   "xlayer_testnet": {
     "chainId": 195,
     "entryPoint": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-    "factory": "0x0000000000000000000000000000000000000000",
+    "factory": "0x7cEb6617962Dd76E96b3227352f0ee9f83FCD2B7",
     "sessionKeyModule": "0x0000000000000000000000000000000000000000",
     "deploymentBlock": 0,
-    "deploymentDate": "",
+    "deploymentDate": "2025-08-10",
     "deployer": ""
   }
 }

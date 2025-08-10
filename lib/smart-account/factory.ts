@@ -12,24 +12,24 @@ import {
 import type { SmartAccountConfig, SmartAccount } from './types';
 import { env } from '../env';
 
-// Contract addresses (deployed to XLayer testnet)
-export const FACTORY_ADDRESS = '0x0000000000000000000000000000000000000000' as const; // Mock for now
+// Contract addresses (deployed to Sepolia testnet)
+export const FACTORY_ADDRESS = '0xB8D779eeEF173c6dBC3a28f0Dec73e48cBE6411C' as const; // Deployed on Sepolia testnet
 export const ENTRYPOINT_ADDRESS = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789' as const;
 
-export const xlayer = {
-  id: 196,
-  name: 'X Layer',
+export const sepolia = {
+  id: 11155111,
+  name: 'Sepolia',
   nativeCurrency: {
     decimals: 18,
-    name: 'OKB',
-    symbol: 'OKB',
+    name: 'Sepolia Ether',
+    symbol: 'ETH',
   },
   rpcUrls: {
-    default: { http: ['https://rpc.xlayer.tech'] },
-    public: { http: ['https://rpc.xlayer.tech'] },
+    default: { http: ['https://eth-sepolia.public.blastapi.io'] },
+    public: { http: ['https://eth-sepolia.public.blastapi.io'] },
   },
   blockExplorers: {
-    default: { name: 'OKX Explorer', url: 'https://www.okx.com/explorer/xlayer' },
+    default: { name: 'Etherscan', url: 'https://sepolia.etherscan.io' },
   },
 } as const;
 
@@ -38,7 +38,7 @@ export async function createSmartAccount(
   accountIndex?: number
 ): Promise<SmartAccount> {
   const client = createPublicClient({
-    chain: xlayer,
+    chain: sepolia,
     transport: http(),
   });
 
@@ -147,20 +147,11 @@ export async function calculateSmartAccountAddress(
   }
 
   const client = createPublicClient({
-    chain: xlayer,
+    chain: sepolia,
     transport: http(),
   });
 
-  if (FACTORY_ADDRESS === '0x0000000000000000000000000000000000000000') {
-    // Factory not deployed yet, return mock address
-    const mockAddress = keccak256(
-      encodeAbiParameters(
-        parseAbiParameters('bytes, bytes32'),
-        [publicKeyHex, salt]
-      )
-    ).slice(0, 42) as Hex;
-    return mockAddress;
-  }
+  // Factory is deployed, no need for mock address fallback
 
   try {
     // Call factory.getAddress(publicKey, salt)
@@ -248,7 +239,7 @@ export function generateInitCode(account: SmartAccount): Hex {
 
 export async function getAccountBalance(address: Hex): Promise<bigint> {
   const client = createPublicClient({
-    chain: xlayer,
+    chain: sepolia,
     transport: http(),
   });
 
@@ -267,7 +258,7 @@ export async function estimateDeploymentCost(): Promise<{
   totalCost: bigint;
 }> {
   const client = createPublicClient({
-    chain: xlayer,
+    chain: sepolia,
     transport: http(),
   });
 
@@ -294,7 +285,7 @@ export async function estimateDeploymentCost(): Promise<{
 
 export async function checkEntryPointDeployment(): Promise<boolean> {
   const client = createPublicClient({
-    chain: xlayer,
+    chain: sepolia,
     transport: http(),
   });
 

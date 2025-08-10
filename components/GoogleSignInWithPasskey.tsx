@@ -4,6 +4,7 @@ import { signIn, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { createPasskey } from '@/lib/passkey';
 import { createSmartAccount } from '@/lib/smart-account/factory';
+import { deploySmartAccount } from '@/lib/smart-account/account';
 import { storePasskey, getStoredPasskey, getNextAccountIndex } from '@/lib/passkey-client';
 
 interface GoogleSignInWithPasskeyProps {
@@ -62,8 +63,22 @@ export function GoogleSignInWithPasskey({ onSuccess }: GoogleSignInWithPasskeyPr
       const smartAccount = await createSmartAccount({
         email: session.user.email,
         publicKey: passkey.publicKey,
-        chainId: 196,
+        chainId: 11155111, // Sepolia testnet
       }, accountIndex);
+      
+      // Check deployment status and deploy if needed
+      if (!smartAccount.isDeployed) {
+        console.log('Deploying smart account on XLayer testnet...');
+        const deployResult = await deploySmartAccount(
+          session.user.email,
+          passkey.publicKey
+        );
+        
+        if (deployResult.success) {
+          console.log('Smart account deployed successfully:', deployResult.txHash);
+          smartAccount.isDeployed = true;
+        }
+      }
 
       // Success - proceed to dashboard
       onSuccess({
@@ -126,8 +141,22 @@ export function GoogleSignInWithPasskey({ onSuccess }: GoogleSignInWithPasskeyPr
           const smartAccount = await createSmartAccount({
             email: session.user.email,
             publicKey: passkeyData.publicKey,
-            chainId: 196,
+            chainId: 11155111, // Sepolia testnet
           }, accountIndex);
+          
+          // Check deployment status
+          if (!smartAccount.isDeployed) {
+            console.log('Deploying smart account on XLayer testnet...');
+            const deployResult = await deploySmartAccount(
+              session.user.email,
+              passkeyData.publicKey
+            );
+            
+            if (deployResult.success) {
+              console.log('Smart account deployed successfully:', deployResult.txHash);
+              smartAccount.isDeployed = true;
+            }
+          }
           
           // Success!
           onSuccess({
@@ -156,8 +185,24 @@ export function GoogleSignInWithPasskey({ onSuccess }: GoogleSignInWithPasskeyPr
       const smartAccount = await createSmartAccount({
         email: session.user.email,
         publicKey: passkeyData.publicKey,
-        chainId: 196,
+        chainId: 11155111, // Sepolia testnet
       }, accountIndex);
+
+      // Deploy the smart account on-chain if not already deployed
+      if (!smartAccount.isDeployed) {
+        console.log('Deploying smart account on XLayer testnet...');
+        const deployResult = await deploySmartAccount(
+          session.user.email,
+          passkeyData.publicKey
+        );
+        
+        if (deployResult.success) {
+          console.log('Smart account deployed successfully:', deployResult.txHash);
+          smartAccount.isDeployed = true;
+        } else {
+          console.warn('Smart account deployment pending - will deploy on first transaction');
+        }
+      }
 
       // Only update database for new users
       if (!isExistingUser) {

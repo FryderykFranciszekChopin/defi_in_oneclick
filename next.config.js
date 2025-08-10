@@ -48,8 +48,8 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value: process.env.NODE_ENV === 'production'
-              ? "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://www.okx.com https://rpc.xlayer.tech wss://rpc.xlayer.tech; frame-src 'none'; object-src 'none';"
-              : "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:* https://www.okx.com https://rpc.xlayer.tech wss://rpc.xlayer.tech; frame-src 'none'; object-src 'none';"
+              ? "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://www.okx.com https://testrpc.xlayer.tech https://rpc.xlayer.tech wss://rpc.xlayer.tech https://eth-sepolia.public.blastapi.io https://sepolia.drpc.org https://api.pimlico.io; frame-src 'none'; object-src 'none';"
+              : "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:* https://www.okx.com https://testrpc.xlayer.tech https://rpc.xlayer.tech wss://rpc.xlayer.tech https://eth-sepolia.public.blastapi.io https://sepolia.drpc.org https://api.pimlico.io; frame-src 'none'; object-src 'none';"
           }
         ]
       }
@@ -63,6 +63,20 @@ const nextConfig = {
   
   // Webpack configuration
   webpack: (config, { isServer }) => {
+    // Browser polyfills for crypto and node modules
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        crypto: false,
+        stream: false,
+        buffer: false,
+        util: false,
+        os: false,
+        path: false,
+        fs: false,
+      };
+    }
+    
     // Fix for Three.js
     config.externals.push({
       bufferutil: 'bufferutil',

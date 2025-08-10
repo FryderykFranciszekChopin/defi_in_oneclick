@@ -9,7 +9,7 @@ import { NextRequest } from 'next/server';
 /**
  * Verify user is authenticated
  */
-export async function requireAuth(request?: NextRequest) {
+export async function requireAuth(_request?: NextRequest) {
   const session = await getServerSession(authOptions);
   
   if (!session?.user?.email) {
@@ -22,7 +22,7 @@ export async function requireAuth(request?: NextRequest) {
 /**
  * Verify user owns the smart account
  */
-export async function verifyAccountOwnership(userEmail: string, accountAddress: string) {
+export async function verifyAccountOwnership(userEmail: string, _accountAddress: string) {
   // In production, verify from database
   const session = await getServerSession(authOptions);
   

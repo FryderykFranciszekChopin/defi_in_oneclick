@@ -1,5 +1,5 @@
 import { type Address, type Hex } from 'viem';
-import { OKXDexAPI, type SwapQuote } from '../okx/dex-api';
+// import { OKXDexAPI } from '../okx/dex-api';
 
 export interface CrossChainRoute {
   fromChain: ChainInfo;
@@ -27,7 +27,7 @@ export interface SwapStep {
 }
 
 export class CrossChainAggregator {
-  private dexApi: OKXDexAPI;
+  // private dexApi: OKXDexAPI;
   
   // Supported chains for cross-chain swaps
   private supportedChains: ChainInfo[] = [
@@ -41,7 +41,7 @@ export class CrossChainAggregator {
   ];
 
   constructor() {
-    this.dexApi = new OKXDexAPI();
+    // this.dexApi = new OKXDexAPI();
   }
 
   /**
@@ -56,14 +56,14 @@ export class CrossChainAggregator {
   ): Promise<CrossChainRoute> {
     // If same chain, just do a simple swap
     if (fromChainId === toChainId) {
-      const quote = await this.dexApi.getQuote({
-        chainId: fromChainId,
-        fromTokenAddress: fromToken,
-        toTokenAddress: toToken,
-        amount: amount.toString(),
-        slippage: 1,
-        userAddress: '0x0000000000000000000000000000000000000000',
-      });
+      // const quote = await this.dexApi.getQuote({
+      //   chainId: fromChainId,
+      //   fromTokenAddress: fromToken,
+      //   toTokenAddress: toToken,
+      //   amount: amount.toString(),
+      //   slippage: 1,
+      //   userAddress: '0x0000000000000000000000000000000000000000',
+      // });
 
       return {
         fromChain: this.getChainInfo(fromChainId),

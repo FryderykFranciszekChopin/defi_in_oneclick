@@ -27,7 +27,7 @@ export class MEVProtection {
    */
   async protectUserOperation(
     userOp: UserOperation,
-    chainId: number
+    _chainId: number
   ): Promise<UserOperation> {
     // Add commit-reveal scheme for sensitive operations
     const protectedOp = await this.addCommitReveal(userOp);
@@ -162,16 +162,16 @@ export class MEVProtection {
    */
   calculateSandwichRisk(
     tokenIn: Address,
-    tokenOut: Address,
+    _tokenOut: Address,
     amountIn: bigint,
-    chainId: number
+    _chainId: number
   ): 'low' | 'medium' | 'high' {
     // Factors that increase sandwich risk:
     // 1. Large trade size
     // 2. Illiquid pairs
     // 3. High slippage tolerance
     
-    const usdValue = this.estimateUSDValue(tokenIn, amountIn, chainId);
+    const usdValue = this.estimateUSDValue(tokenIn, amountIn, _chainId);
     
     if (usdValue > 100000) return 'high';
     if (usdValue > 10000) return 'medium';
@@ -184,7 +184,7 @@ export class MEVProtection {
   private estimateUSDValue(
     token: Address,
     amount: bigint,
-    chainId: number
+    _chainId: number
   ): number {
     // Simplified estimation
     const stablecoins = [

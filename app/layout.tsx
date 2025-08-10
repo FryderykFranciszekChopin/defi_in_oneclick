@@ -14,6 +14,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'OneClick DeFi - Email to DeFi in One Click',
   description: 'The simplest way to start using DeFi with just your email. No gas fees, no complexity.',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({

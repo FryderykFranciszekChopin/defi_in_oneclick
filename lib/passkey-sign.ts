@@ -21,7 +21,7 @@ export async function signWithPasskey(message: string): Promise<{ signature: Hex
     const assertionOptions: PublicKeyCredentialRequestOptions = {
       challenge,
       allowCredentials: [{
-        id: Uint8Array.from(atob(passkeyData.rawId), c => c.charCodeAt(0)),
+        id: Uint8Array.from(atob(passkeyData.id), c => c.charCodeAt(0)),
         type: 'public-key',
       }],
       userVerification: 'required', // Force biometric/PIN verification

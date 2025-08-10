@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const OKX_API_URL = 'https://www.okx.com/api/v5';
-const DEX_BASE_URL = 'https://www.okx.com/api/v5/dex/aggregator';
+// const DEX_BASE_URL = 'https://www.okx.com/api/v5/dex/aggregator';
 
 export interface TokenInfo {
   chainId: number;
@@ -33,43 +33,43 @@ export interface DexParams {
 
 export class OKXDexAPI {
   private apiKey: string;
-  private secretKey: string;
-  private passphrase: string;
+  // private _secretKey: string;
+  private _passphrase: string;
 
   constructor() {
     this.apiKey = process.env.OKX_API_KEY || '';
-    this.secretKey = process.env.OKX_SECRET_KEY || '';
-    this.passphrase = process.env.OKX_PASSPHRASE || '';
+    // this._secretKey = process.env.OKX_SECRET_KEY || '';
+    this._passphrase = process.env.OKX_PASSPHRASE || '';
   }
 
   private createSignature(
-    timestamp: string,
-    method: string,
-    requestPath: string,
-    queryString?: string
+    _timestamp: string,
+    _method: string,
+    _requestPath: string,
+    _queryString?: string
   ): string {
     // In production, this should be done server-side
-    const message = timestamp + method + requestPath + (queryString || '');
+    // const message = timestamp + method + requestPath + (queryString || '');
     // Mock signature for client-side demo
     return 'mock-signature';
   }
 
-  private getHeaders(
-    method: string,
-    requestPath: string,
-    queryString?: string
-  ): Record<string, string> {
-    const timestamp = new Date().toISOString();
-    const signature = this.createSignature(timestamp, method, requestPath, queryString);
-
-    return {
-      'OK-ACCESS-KEY': this.apiKey,
-      'OK-ACCESS-SIGN': signature,
-      'OK-ACCESS-TIMESTAMP': timestamp,
-      'OK-ACCESS-PASSPHRASE': this.passphrase,
-      'Content-Type': 'application/json',
-    };
-  }
+  // private _getHeaders(
+  //   method: string,
+  //   requestPath: string,
+  //   queryString?: string
+  // ): Record<string, string> {
+  //   const timestamp = new Date().toISOString();
+  //   const signature = this.createSignature(timestamp, method, requestPath, queryString);
+  //
+  //   return {
+  //     'OK-ACCESS-KEY': this.apiKey,
+  //     'OK-ACCESS-SIGN': signature,
+  //     'OK-ACCESS-TIMESTAMP': timestamp,
+  //     'OK-ACCESS-PASSPHRASE': this._passphrase,
+  //     'Content-Type': 'application/json',
+  //   };
+  // }
 
   async getQuote(params: DexParams): Promise<SwapQuote> {
     try {
@@ -89,7 +89,7 @@ export class OKXDexAPI {
         'OK-ACCESS-KEY': this.apiKey,
         'OK-ACCESS-SIGN': signature,
         'OK-ACCESS-TIMESTAMP': timestamp,
-        'OK-ACCESS-PASSPHRASE': this.passphrase,
+        'OK-ACCESS-PASSPHRASE': this._passphrase,
         'Content-Type': 'application/json',
       };
 

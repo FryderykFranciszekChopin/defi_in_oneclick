@@ -268,7 +268,7 @@ export function SessionKeyManager() {
                     </div>
                     {key.allowedTargets.length > 0 && (
                       <div>
-                        Target: {key.allowedTargets[0].slice(0, 6)}...{key.allowedTargets[0].slice(-4)}
+                        Target: {key.allowedTargets[0]?.slice(0, 6)}...{key.allowedTargets[0]?.slice(-4)}
                       </div>
                     )}
                   </div>

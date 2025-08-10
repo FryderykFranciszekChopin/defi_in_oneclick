@@ -127,7 +127,7 @@ export function SocialRecoveryManager() {
     }
   };
 
-  const notifyGuardians = async (guardians: Guardian[], accountAddress: string) => {
+  const notifyGuardians = async (guardians: Guardian[], _accountAddress: string) => {
     // In production, send emails or notifications to guardians
     // For now, just log
     console.log('Notifying guardians:', guardians);

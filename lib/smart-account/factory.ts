@@ -2,7 +2,7 @@ import {
   createPublicClient, 
   http, 
   encodeFunctionData, 
-  getContractAddress, 
+  // getContractAddress, 
   keccak256, 
   encodeAbiParameters,
   parseAbiParameters,
@@ -10,7 +10,8 @@ import {
   type Hex
 } from 'viem';
 import type { SmartAccountConfig, SmartAccount } from './types';
-import { env } from '../env';
+import { getOrCreateSmartAccountAddress } from './address-manager';
+// import { env } from '../env';
 
 // Contract addresses (deployed to Sepolia testnet)
 export const FACTORY_ADDRESS = '0xB8D779eeEF173c6dBC3a28f0Dec73e48cBE6411C' as const; // Deployed on Sepolia testnet
@@ -42,11 +43,8 @@ export async function createSmartAccount(
     transport: http(),
   });
 
-  // Calculate salt from email, public key, and optional account index
-  const salt = calculateSalt(config.email, config.publicKey, accountIndex);
-  
-  // Calculate deterministic address using CREATE2
-  const address = await calculateSmartAccountAddress(config.publicKey, salt);
+  // Use address manager to ensure consistency
+  const address = await getOrCreateSmartAccountAddress(config.email, config.publicKey);
 
   // Check if already deployed
   let isDeployed = false;
@@ -105,30 +103,21 @@ export async function createSmartAccount(
 export function calculateSalt(email: string, publicKey: string, nonce?: number): Hex {
   // Salt generation with optional nonce for multiple accounts
   const nonceValue = nonce || 0; // Default to 0 for first account
-  const data = encodeAbiParameters(
-    parseAbiParameters('string, bytes, uint256'),
-    [email, publicKey as Hex, BigInt(nonceValue)]
-  );
-  return keccak256(data);
-}
-
-export async function calculateSmartAccountAddress(
-  publicKey: string,
-  salt: Hex
-): Promise<Hex> {
-  // Ensure publicKey is properly formatted as hex
+  
+  // Ensure publicKey is properly formatted
   let publicKeyHex: Hex;
   
-  if (publicKey.startsWith('0x')) {
-    // Already hex encoded
+  if (!publicKey || publicKey === '') {
+    console.error('calculateSalt: publicKey is empty!');
+    // Generate a deterministic fallback based on email
+    publicKeyHex = keccak256(toHex(email + '_fallback_key'));
+  } else if (publicKey.startsWith('0x')) {
     publicKeyHex = publicKey as Hex;
   } else {
-    // Might be base64 or other format, convert to hex
+    // Convert base64 or other format to hex
     try {
-      // If it's base64 JSON, decode it
       const decoded = atob(publicKey);
       if (decoded.startsWith('{')) {
-        // It's JSON, extract x and y coordinates
         const keyData = JSON.parse(decoded);
         const x = keyData.x || [];
         const y = keyData.y || [];
@@ -136,22 +125,59 @@ export async function calculateSmartAccountAddress(
           x.map((b: number) => b.toString(16).padStart(2, '0')).join('') +
           y.map((b: number) => b.toString(16).padStart(2, '0')).join('')) as Hex;
       } else {
-        // Direct conversion
         publicKeyHex = ('0x' + Buffer.from(publicKey, 'base64').toString('hex')) as Hex;
       }
     } catch (e) {
-      console.error('Failed to parse public key:', e);
-      // Fallback - generate deterministic but invalid key
-      publicKeyHex = keccak256(toHex(publicKey)) as Hex;
+      console.error('Failed to parse publicKey in calculateSalt:', e);
+      // Fallback: use hash of the key
+      publicKeyHex = keccak256(toHex(publicKey));
     }
   }
+  
+  console.log('calculateSalt inputs:', { email, publicKeyHex, nonceValue });
+  
+  const data = encodeAbiParameters(
+    parseAbiParameters('string, bytes, uint256'),
+    [email, publicKeyHex, BigInt(nonceValue)]
+  );
+  const salt = keccak256(data);
+  console.log('Generated salt:', salt);
+  return salt;
+}
 
+export async function calculateSmartAccountAddress(
+  publicKey: string,
+  salt: Hex
+): Promise<Hex> {
+  // Ensure publicKey is properly formatted
+  let publicKeyHex: Hex;
+  if (publicKey.startsWith('0x')) {
+    publicKeyHex = publicKey as Hex;
+  } else {
+    try {
+      const decoded = atob(publicKey);
+      if (decoded.startsWith('{')) {
+        const keyData = JSON.parse(decoded);
+        const x = keyData.x || [];
+        const y = keyData.y || [];
+        publicKeyHex = ('0x' + 
+          x.map((b: number) => b.toString(16).padStart(2, '0')).join('') +
+          y.map((b: number) => b.toString(16).padStart(2, '0')).join('')) as Hex;
+      } else {
+        publicKeyHex = ('0x' + Buffer.from(publicKey, 'base64').toString('hex')) as Hex;
+      }
+    } catch (e) {
+      console.error('Failed to parse publicKey in calculateSmartAccountAddress:', e);
+      publicKeyHex = keccak256(toHex(publicKey));
+    }
+  }
+  
+  console.log('calculateSmartAccountAddress inputs:', { publicKeyHex, salt });
+  
   const client = createPublicClient({
     chain: sepolia,
     transport: http(),
   });
-
-  // Factory is deployed, no need for mock address fallback
 
   try {
     // Call factory.getAddress(publicKey, salt)
@@ -172,17 +198,29 @@ export async function calculateSmartAccountAddress(
       args: [publicKeyHex, salt],
     }) as Hex;
     
+    console.log('Calculated smart account address from factory:', address);
     return address;
   } catch (error) {
-    console.error('Failed to calculate address:', error);
-    // Fallback to mock
-    const mockAddress = keccak256(
+    console.error('Failed to calculate address from factory:', error);
+    
+    // Fallback: Calculate using CREATE2 formula
+    const initCodeHash = keccak256(
       encodeAbiParameters(
-        parseAbiParameters('bytes, bytes32'),
-        [publicKeyHex, salt]
+        parseAbiParameters('bytes'),
+        [publicKey as Hex]
       )
-    ).slice(0, 42) as Hex;
-    return mockAddress;
+    );
+    
+    const addressBytes = keccak256(
+      encodeAbiParameters(
+        parseAbiParameters('bytes1, address, bytes32, bytes32'),
+        ['0xff' as Hex, FACTORY_ADDRESS, salt, initCodeHash]
+      )
+    );
+    
+    const address = ('0x' + addressBytes.slice(-40)) as Hex;
+    console.log('Calculated address locally:', address);
+    return address;
   }
 }
 

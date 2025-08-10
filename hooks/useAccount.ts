@@ -5,7 +5,7 @@ import { getStoredPasskey } from '../lib/passkey-client';
 import type { SmartAccount } from '../lib/smart-account/types';
 import type { Token } from '../types';
 import { createPublicClient, http, erc20Abi } from 'viem';
-import { xlayer } from '../lib/smart-account/factory';
+import { sepolia } from '../lib/smart-account/factory';
 import { useSession } from 'next-auth/react';
 
 interface AccountState {
@@ -16,15 +16,15 @@ interface AccountState {
   error: string | null;
 }
 
-// Common XLayer tokens with CDN-hosted logos for CORS compatibility
-const XLAYER_TOKENS: Token[] = [
+// Common Sepolia tokens with CDN-hosted logos for CORS compatibility
+const SEPOLIA_TOKENS: Token[] = [
   {
-    symbol: 'OKB',
-    name: 'OKB',
+    symbol: 'ETH',
+    name: 'Sepolia Ether',
     address: '0x0000000000000000000000000000000000000000', // Native token
     decimals: 18,
     logoURI: 'https://cdn.jsdelivr.net/gh/Uniswap/assets@master/blockchains/ethereum/assets/0x75231F58b43240C9718Dd58B4967c5114342a86c/logo.png',
-    chainId: 196,
+    chainId: '11155111',
   },
   {
     symbol: 'USDT',
@@ -32,7 +32,7 @@ const XLAYER_TOKENS: Token[] = [
     address: '0x1E4a5963aBFD975d8c9021ce480b42188849D41d',
     decimals: 6,
     logoURI: 'https://cdn.jsdelivr.net/gh/Uniswap/assets@master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png',
-    chainId: 196,
+    chainId: '11155111',
   },
   {
     symbol: 'USDC',
@@ -40,7 +40,7 @@ const XLAYER_TOKENS: Token[] = [
     address: '0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035',
     decimals: 6,
     logoURI: 'https://cdn.jsdelivr.net/gh/Uniswap/assets@master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png',
-    chainId: 196,
+    chainId: '11155111',
   },
   {
     symbol: 'WETH',
@@ -48,7 +48,7 @@ const XLAYER_TOKENS: Token[] = [
     address: '0x5A77f1443D16ee5761d310e38b62f77f726bC71c',
     decimals: 18,
     logoURI: 'https://cdn.jsdelivr.net/gh/Uniswap/assets@master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png',
-    chainId: 196,
+    chainId: '11155111',
   },
 ];
 
@@ -93,7 +93,7 @@ export function useAccount() {
       const account = await createSmartAccount({
         email: passkey.email,
         publicKey: passkey.publicKey,
-        chainId: xlayer.id,
+        chainId: sepolia.id,
       });
 
       setState(prev => ({ ...prev, account, isLoading: false }));
@@ -118,12 +118,12 @@ export function useAccount() {
 
       // Get token balances
       const client = createPublicClient({
-        chain: xlayer,
+        chain: sepolia,
         transport: http(),
       });
 
       const tokensWithBalance = await Promise.all(
-        XLAYER_TOKENS.map(async (token) => {
+        SEPOLIA_TOKENS.map(async (token) => {
           if (token.address === '0x0000000000000000000000000000000000000000') {
             // Native token
             return {
@@ -188,6 +188,7 @@ export function useAccount() {
       const interval = setInterval(refreshBalance, 30000); // Every 30 seconds
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [state.account, refreshBalance]);
 
   return {

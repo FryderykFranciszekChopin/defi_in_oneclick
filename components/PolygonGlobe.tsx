@@ -523,14 +523,14 @@ export const PolygonGlobe: React.FC<PolygonGlobeProps> = ({ className = '' }) =>
     // Animation
     let frameCount = 0;
     const startTime = Date.now();
-    let lastFrameTime = performance.now();
+    // let lastFrameTime = performance.now();
     
     const animate = () => {
       if (!sceneRef.current || !isVisibleRef.current) return;
       
-      const currentTime = performance.now();
-      const deltaTime = Math.min((currentTime - lastFrameTime) / 1000, 0.1);
-      lastFrameTime = currentTime;
+      // const currentTime = performance.now();
+      // const deltaTime = Math.min((currentTime - lastFrameTime) / 1000, 0.1);
+      // lastFrameTime = currentTime;
       
       frameCount++;
       const time = (Date.now() - startTime) * 0.001;

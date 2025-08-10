@@ -6,13 +6,14 @@ import { createPasskey } from '@/lib/passkey';
 import { createSmartAccount } from '@/lib/smart-account/factory';
 import { deploySmartAccount } from '@/lib/smart-account/account';
 import { storePasskey, getStoredPasskey, getNextAccountIndex } from '@/lib/passkey-client';
+import { validateAndCleanPasskey } from '@/lib/cleanup-utils';
 
 interface GoogleSignInWithPasskeyProps {
   onSuccess: (account: any) => void;
 }
 
 export function GoogleSignInWithPasskey({ onSuccess }: GoogleSignInWithPasskeyProps) {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState<'google' | 'passkey' | 'loading'>('google');
@@ -22,6 +23,14 @@ export function GoogleSignInWithPasskey({ onSuccess }: GoogleSignInWithPasskeyPr
       // If user is signed in with Google
       if (session?.user?.email && step !== 'loading') {
         setStep('loading');
+        
+        // First, validate and clean any corrupted data
+        const isDataValid = validateAndCleanPasskey();
+        if (!isDataValid) {
+          // Data was corrupted and cleared, redirect to passkey creation
+          setStep('passkey');
+          return;
+        }
         
         // Check if user already has a passkey stored locally
         const existingPasskey = getStoredPasskey();
@@ -55,6 +64,21 @@ export function GoogleSignInWithPasskey({ onSuccess }: GoogleSignInWithPasskeyPr
 
   const handleExistingPasskey = async (passkey: any) => {
     if (!session?.user?.email) return;
+    
+    console.log('handleExistingPasskey - passkey data:', passkey); // Debug log
+    
+    // Check if publicKey is valid
+    if (!passkey.publicKey || passkey.publicKey === '' || passkey.publicKey === '0x') {
+      console.error('Invalid publicKey in stored passkey:', passkey.publicKey);
+      console.log('Clearing corrupted passkey data and starting fresh...');
+      
+      // Clear corrupted data
+      localStorage.removeItem('oneclick_defi_passkey');
+      localStorage.removeItem('smart_account_address');
+      
+      // Redirect to passkey creation
+      throw new Error('Invalid publicKey in stored passkey - cleared corrupted data');
+    }
     
     try {
       const accountIndex = passkey.accountIndex || 0;

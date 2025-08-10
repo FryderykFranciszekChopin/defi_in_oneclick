@@ -1,18 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { parseUnits } from 'viem';
-// Mock implementations for demo
+import { useState } from 'react';
+// import { parseUnits } from 'viem';
+// Mock implementations for demo (commented out for now)
+/*
 const XLAYER_TOKENS = [
   { symbol: 'OKB', address: '0x0000000000000000000000000000000000000000', decimals: 18, name: 'OKB' },
   { symbol: 'USDC', address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6, name: 'USD Coin' },
 ];
+*/
 
 interface AdvancedSwapInterfaceProps {
   account: any;
 }
 
-export function AdvancedSwapInterface({ account }: AdvancedSwapInterfaceProps) {
+export function AdvancedSwapInterface({ account: _ }: AdvancedSwapInterfaceProps) {
   const [sessionKeyEnabled, setSessionKeyEnabled] = useState(false);
   const [crossChainMode, setCrossChainMode] = useState(false);
   const [mevProtection, setMevProtection] = useState(true);

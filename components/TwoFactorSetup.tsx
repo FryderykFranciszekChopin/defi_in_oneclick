@@ -15,7 +15,7 @@ interface TwoFactorConfig {
 export function TwoFactorSetup() {
   const { address: userAddress } = useAccount();
   const [config, setConfig] = useState<TwoFactorConfig | null>(null);
-  const [isSettingUp, setIsSettingUp] = useState(false);
+  // const [, setIsSettingUp] = useState(false);
   const [showSetup, setShowSetup] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [secret, setSecret] = useState('');

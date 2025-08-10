@@ -1,0 +1,19 @@
+[profile.default]
+src = "contracts"
+out = "out"
+libs = ["lib"]
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/crates/config
+
+[profile.default.model_checker]
+contracts = { '/path/to/project/src/Contract.sol' = [ 'Contract' ] }
+engine = 'chc'
+targets = [ 'assert' ]
+
+[rpc_endpoints]
+sepolia = "https://eth-sepolia.public.blastapi.io"
+xlayer = "https://testrpc.xlayer.tech"
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}" }
+xlayer = { key = "${XLAYER_API_KEY}", url = "https://www.okx.com/explorer/xlayer-test/api" }

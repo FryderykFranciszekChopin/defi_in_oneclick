@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { createPublicClient, http, type Hex, type Log } from 'viem';
-import { xlayer } from '../lib/smart-account/factory';
-import type { UserOperationReceipt } from '../lib/gasless/bundler';
+import { createPublicClient, http, type Hex } from 'viem';
+import { sepolia } from '../lib/smart-account/factory';
+// import type { UserOperationReceipt } from '../lib/gasless/bundler';
 
 export interface Transaction {
   hash: Hex;
@@ -127,7 +127,7 @@ export function useTransactionHistory(accountAddress?: Hex) {
     setIsLoading(true);
     try {
       const client = createPublicClient({
-        chain: xlayer,
+        chain: sepolia,
         transport: http(),
       });
 
@@ -167,7 +167,7 @@ export function useTransactionHistory(accountAddress?: Hex) {
       );
 
       // Merge with stored transactions
-      const validTxs = onChainTxs.filter((tx): tx is Transaction => tx !== null);
+      const validTxs = onChainTxs.filter((tx): tx is NonNullable<typeof tx> => tx !== null);
       if (validTxs.length > 0) {
         setTransactions(prev => {
           // Deduplicate by hash
@@ -195,6 +195,7 @@ export function useTransactionHistory(accountAddress?: Hex) {
       const interval = setInterval(fetchOnChainHistory, 60000); // Every minute
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [accountAddress, fetchOnChainHistory]);
 
   return {

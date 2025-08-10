@@ -1,6 +1,6 @@
 import { startAuthentication } from '@simplewebauthn/browser';
 import type { Hex } from 'viem';
-import { encodeAbiParameters, parseAbiParameters, hexToBytes, bytesToHex } from 'viem';
+import { encodeAbiParameters, parseAbiParameters, bytesToHex } from 'viem';
 
 interface PasskeySignatureData {
   authenticatorData: Hex;
@@ -116,7 +116,7 @@ function parseSignature(derSignature: Uint8Array): { r: bigint; s: bigint } {
   
   // Skip total length
   const totalLength = derSignature[offset++];
-  if (totalLength > derSignature.length - 2) {
+  if (!totalLength || totalLength > derSignature.length - 2) {
     throw new Error('Invalid DER signature length');
   }
   
@@ -126,6 +126,9 @@ function parseSignature(derSignature: Uint8Array): { r: bigint; s: bigint } {
   }
   
   const rLength = derSignature[offset++];
+  if (!rLength) {
+    throw new Error('Invalid DER signature r length');
+  }
   const rBytes = derSignature.slice(offset, offset + rLength);
   offset += rLength;
   
@@ -135,6 +138,9 @@ function parseSignature(derSignature: Uint8Array): { r: bigint; s: bigint } {
   }
   
   const sLength = derSignature[offset++];
+  if (!sLength) {
+    throw new Error('Invalid DER signature s length');
+  }
   const sBytes = derSignature.slice(offset, offset + sLength);
   
   // Convert to bigint
@@ -175,7 +181,7 @@ export function getMockSignature(): Hex {
   // This creates a properly formatted signature that will fail validation
   // but allows testing the flow
   const mockData: PasskeySignatureData = {
-    authenticatorData: '0x' + '00'.repeat(37),
+    authenticatorData: ('0x' + '00'.repeat(37)) as Hex,
     clientDataJSON: JSON.stringify({
       type: 'webauthn.get',
       challenge: '00'.repeat(32),

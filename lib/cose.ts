@@ -4,16 +4,16 @@
  */
 
 // COSE key parameters
-const COSE_KTY = 1;    // Key Type
-const COSE_ALG = 3;    // Algorithm
-const COSE_CRV = -1;   // Curve
-const COSE_X = -2;     // X coordinate
-const COSE_Y = -3;     // Y coordinate
+// const COSE_KTY = 1;    // Key Type
+// const COSE_ALG = 3;    // Algorithm
+// const COSE_CRV = -1;   // Curve
+// const COSE_X = -2;     // X coordinate
+// const COSE_Y = -3;     // Y coordinate
 
 // COSE values
-const COSE_KTY_EC2 = 2;        // Elliptic Curve
-const COSE_ALG_ES256 = -7;     // ECDSA with SHA-256
-const COSE_CRV_P256 = 1;       // P-256 curve
+// const COSE_KTY_EC2 = 2;        // Elliptic Curve
+// const COSE_ALG_ES256 = -7;     // ECDSA with SHA-256
+// const COSE_CRV_P256 = 1;       // P-256 curve
 
 /**
  * Parse a COSE public key and extract P-256 coordinates
@@ -26,14 +26,14 @@ export function parseCOSEPublicKey(coseKey: Uint8Array): { x: string; y: string 
     // A proper implementation would use a full CBOR parser
     
     // Check if it's a map (major type 5)
-    if ((coseKey[0] & 0xE0) !== 0xA0) {
+    if (coseKey.length === 0 || ((coseKey[0] ?? 0) & 0xE0) !== 0xA0) {
       console.error('Invalid COSE key: not a CBOR map');
       return null;
     }
     
     // Parse the map
-    const map = new Map<number, any>();
-    let offset = 1; // Skip the map header
+    // const map = new Map<number, any>();
+    // let offset = 1; // Skip the map header
     
     // For P-256 keys, we expect specific fields
     // This is a simplified parser that looks for the x and y coordinates

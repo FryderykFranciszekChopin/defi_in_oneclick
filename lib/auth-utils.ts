@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { Hex, keccak256, encodeAbiParameters, parseAbiParameters, toHex } from 'viem';
+import { Hex, keccak256, encodeAbiParameters, parseAbiParameters } from 'viem';
 
 /**
  * Generate a deterministic key pair from email

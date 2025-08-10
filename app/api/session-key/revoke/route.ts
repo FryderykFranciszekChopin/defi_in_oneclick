@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { type Address } from 'viem';
+// import { type Address } from 'viem';
 
-// SessionKeyModule ABI
+// SessionKeyModule ABI (for future implementation)
+/*
 const SESSION_KEY_MODULE_ABI = [
   {
     inputs: [{ name: 'key', type: 'address' }],
@@ -11,6 +12,7 @@ const SESSION_KEY_MODULE_ABI = [
     type: 'function',
   },
 ] as const;
+*/
 
 export async function POST(request: NextRequest) {
   try {

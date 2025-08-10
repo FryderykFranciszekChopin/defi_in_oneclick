@@ -75,7 +75,7 @@ export class SessionKeyManager {
    */
   getRegisterSessionKeyCalldata(
     sessionKey: SessionKey,
-    moduleAddress: Address
+    _moduleAddress: Address
   ): Hex {
     const validAfter = Math.floor(Date.now() / 1000);
     
@@ -148,9 +148,9 @@ export class SessionKeyManager {
   /**
    * Simple decryption (use proper decryption in production)
    */
-  private decrypt(data: string): string {
-    return atob(data);
-  }
+  // private decrypt(data: string): string {
+  //   return atob(data);
+  // }
 
   /**
    * Check if session key is valid

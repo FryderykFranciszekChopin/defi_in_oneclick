@@ -30,9 +30,11 @@
   "license": "MIT",
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
+    "@openzeppelin/contracts": "^5.4.0",
     "@prisma/client": "^6.13.0",
     "@simplewebauthn/browser": "^13.1.2",
     "@simplewebauthn/server": "^13.1.2",
+    "@simplewebauthn/types": "^12.0.0",
     "@tanstack/react-query": "^5.83.0",
     "@types/node": "^24.1.0",
     "@types/nodemailer": "^6.4.17",
@@ -59,9 +61,13 @@
     "zod": "^4.0.14"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.1.0",
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
-    "@types/speakeasy": "^2.0.10"
+    "@types/speakeasy": "^2.0.10",
+    "ethers": "^6.15.0",
+    "hardhat": "^2.26.2"
   }
 }

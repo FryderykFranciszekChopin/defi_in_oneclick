@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createPublicClient, createWalletClient, http, type Address } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
-import { polygon } from 'viem/chains';
+import { type Address } from 'viem';
+// import { createPublicClient, http } from 'viem';
+// import { polygon } from 'viem/chains';
 
-// SessionKeyModule ABI
+// SessionKeyModule ABI (for future implementation)
+/*
 const SESSION_KEY_MODULE_ABI = [
   {
     inputs: [
@@ -20,7 +21,7 @@ const SESSION_KEY_MODULE_ABI = [
   },
 ] as const;
 
-// OneClickAccount ABI for setting session key module
+// OneClickAccount ABI for setting session key module (for future implementation)
 const ACCOUNT_ABI = [
   {
     inputs: [{ name: 'module', type: 'address' }],
@@ -30,6 +31,7 @@ const ACCOUNT_ABI = [
     type: 'function',
   },
 ] as const;
+*/
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,8 +41,8 @@ export async function POST(request: NextRequest) {
       sessionKeyAddress,
       validUntil,
       spendingLimit,
-      allowedTargets = [],
-      allowedFunctions = [],
+      // allowedTargets = [],
+      // allowedFunctions = [],
     } = body;
 
     if (!userAddress || !sessionKeyAddress || !validUntil || !spendingLimit) {
@@ -59,22 +61,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create clients
-    const publicClient = createPublicClient({
-      chain: polygon,
-      transport: http(process.env.RPC_URL),
-    });
+    // Create clients (for future implementation)
+    // const publicClient = createPublicClient({
+    //   chain: polygon,
+    //   transport: http(process.env.RPC_URL),
+    // });
 
     // For production, this would be done through a meta-transaction or admin key
     // Here we're simulating the registration
-    const registrationData = {
-      userAddress: userAddress as Address,
-      sessionKey: sessionKeyAddress as Address,
-      validUntil: BigInt(validUntil),
-      spendingLimit: BigInt(spendingLimit),
-      allowedTargets: allowedTargets as Address[],
-      allowedFunctions: allowedFunctions as `0x${string}`[],
-    };
+    // const registrationData = {
+    //   userAddress: userAddress as Address,
+    //   sessionKey: sessionKeyAddress as Address,
+    //   validUntil: BigInt(validUntil),
+    //   spendingLimit: BigInt(spendingLimit),
+    //   allowedTargets: allowedTargets as Address[],
+    //   allowedFunctions: allowedFunctions as `0x${string}`[],
+    // };
 
     // In production, this would:
     // 1. Verify the user owns the account

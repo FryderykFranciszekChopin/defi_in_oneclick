@@ -21,23 +21,23 @@ export interface SwapRequest {
 
 export class OKXSwapAPI {
   private apiKey: string;
-  private secretKey: string;
-  private passphrase: string;
+  // private _secretKey: string;
+  private _passphrase: string;
 
   constructor() {
     this.apiKey = process.env.OKX_API_KEY || '';
-    this.secretKey = process.env.OKX_SECRET_KEY || '';
-    this.passphrase = process.env.OKX_PASSPHRASE || '';
+    // this._secretKey = process.env.OKX_SECRET_KEY || '';
+    this._passphrase = process.env.OKX_PASSPHRASE || '';
   }
 
   private createSignature(
-    timestamp: string,
-    method: string,
-    requestPath: string,
-    body?: string
+    _timestamp: string,
+    _method: string,
+    _requestPath: string,
+    _body?: string
   ): string {
     // In production, this should be done server-side
-    const message = timestamp + method + requestPath + (body || '');
+    // const message = timestamp + method + requestPath + (body || '');
     // Mock signature for client-side demo
     return 'mock-signature';
   }
@@ -62,7 +62,7 @@ export class OKXSwapAPI {
         'OK-ACCESS-KEY': this.apiKey,
         'OK-ACCESS-SIGN': signature,
         'OK-ACCESS-TIMESTAMP': timestamp,
-        'OK-ACCESS-PASSPHRASE': this.passphrase,
+        'OK-ACCESS-PASSPHRASE': this._passphrase,
         'Content-Type': 'application/json',
       };
 

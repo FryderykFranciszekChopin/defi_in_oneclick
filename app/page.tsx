@@ -11,10 +11,10 @@ import { getStoredPasskey } from '@/lib/passkey-client';
 export default function Home() {
   const { data: session, status } = useSession();
   const [account, setAccount] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [tapTrigger, setTapTrigger] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [forceShowBackground, setForceShowBackground] = useState(false);
+  // const [isMobile, setIsMobile] = useState(false);
+  // const [forceShowBackground, setForceShowBackground] = useState(false);
 
   // Check if user has completed the full setup (Google + Passkey)
   useEffect(() => {
@@ -36,9 +36,9 @@ export default function Home() {
   // Mobile detection
   useEffect(() => {
     const checkMobile = () => {
-      const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
-                           window.innerWidth < 768;
-      setIsMobile(false); // Always show 3D background
+      // const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+      //                      window.innerWidth < 768;
+      // setIsMobile(false); // Always show 3D background
     };
     
     checkMobile();
@@ -51,11 +51,11 @@ export default function Home() {
     setTapTrigger(!tapTrigger);
   };
   
-  const handleAccountCreated = (newAccount: any) => {
-    if (newAccount && newAccount.email && newAccount.address) {
-      setAccount(newAccount);
-    }
-  };
+  // const handleAccountCreated = (newAccount: any) => {
+  //   if (newAccount && newAccount.email && newAccount.address) {
+  //     setAccount(newAccount);
+  //   }
+  // };
 
   // Show loading while checking session
   if (status === 'loading') {

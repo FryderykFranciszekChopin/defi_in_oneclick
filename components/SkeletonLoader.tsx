@@ -178,7 +178,8 @@ export const DashboardSkeleton: React.FC = () => {
   );
 };
 
-// Add shimmer animation to globals.css
+// Add shimmer animation to globals.css (commented out for now)
+/*
 const shimmerStyle = `
 @keyframes shimmer {
   0% {
@@ -200,3 +201,4 @@ const shimmerStyle = `
   background-size: 1000px 100%;
 }
 `;
+*/

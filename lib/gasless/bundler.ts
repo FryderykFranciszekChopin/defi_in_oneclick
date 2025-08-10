@@ -1,5 +1,5 @@
 import { createPublicClient, http, type Hex, parseEther } from 'viem';
-import { xlayer } from '../smart-account/factory';
+import { xlayerTestnet } from '../networks/config';
 import type { UserOperation } from '../smart-account/types';
 const BUNDLER_RPC = `https://api.pimlico.io/v2/xlayer/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY || ''}`;
 const ENTRYPOINT_ADDRESS = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789' as const;
@@ -44,7 +44,7 @@ export class BundlerClient {
   constructor() {
     this.rpcUrl = BUNDLER_RPC;
     this.client = createPublicClient({
-      chain: xlayer,
+      chain: xlayerTestnet,
       transport: http(this.rpcUrl),
     });
   }
@@ -219,7 +219,7 @@ export class BundlerClient {
       return parseInt(chainId, 16);
     } catch (error) {
       console.error('Failed to get chain ID:', error);
-      return xlayer.id;
+      return xlayerTestnet.id;
     }
   }
 }

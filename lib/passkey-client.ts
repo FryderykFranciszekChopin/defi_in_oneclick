@@ -46,7 +46,19 @@ export function getStoredPasskey(): StoredPasskey | null {
 export function storePasskey(passkey: StoredPasskey): boolean {
   if (typeof window === 'undefined') return false;
   
+  // Validate passkey data before storing
+  if (!passkey.publicKey || passkey.publicKey === '' || passkey.publicKey === '0x') {
+    console.error('Cannot store passkey with invalid publicKey:', passkey.publicKey);
+    return false;
+  }
+  
+  if (!passkey.email || !passkey.id) {
+    console.error('Cannot store passkey with missing required fields');
+    return false;
+  }
+  
   try {
+    console.log('Storing validated passkey with publicKey:', passkey.publicKey.substring(0, 10) + '...');
     localStorage.setItem('oneclick_defi_passkey', JSON.stringify(passkey));
     return true;
   } catch (error) {

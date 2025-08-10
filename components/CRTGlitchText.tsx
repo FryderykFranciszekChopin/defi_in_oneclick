@@ -9,7 +9,7 @@ interface CRTGlitchTextProps {
 
 export const CRTGlitchText: React.FC<CRTGlitchTextProps> = ({ 
   className = '', 
-  onTapTrigger = false,
+  onTapTrigger: _,
   children,
   onClick
 }) => {
@@ -43,11 +43,11 @@ export const CRTGlitchText: React.FC<CRTGlitchTextProps> = ({
       // 다단계 사이클: 정지(3초) → 전조증상(1.5초) → 서서히강화(0.5초) → 강한효과(1.5초) → 4단계 복원(4.5초) → 반복
       const totalCycle = 11000; // 총 11초 사이클
       const timeSinceLastGlitch = currentTime - lastAutoGlitchRef.current;
-      const firstGlitchDelay = 3000; // 첫 글리치까지 3초
+      // const firstGlitchDelay = 3000; // 첫 글리치까지 3초
       
       // 전조증상과 강한효과를 하나의 연속적인 흐름으로 처리
       let globalIntensity = 0;
-      let isInTransition = false;
+      // let isInTransition = false;
       
       if (timeSinceLastGlitch > 3000) {
         const effectTime = timeSinceLastGlitch - 3000; // 3초 후부터 효과 시작
@@ -56,41 +56,41 @@ export const CRTGlitchText: React.FC<CRTGlitchTextProps> = ({
           if (effectTime < 1500) {
             // 1.5초간 전조증상 (0 → 30%)
             globalIntensity = (effectTime / 1500) * 0.3;
-            isInTransition = true;
+            // isInTransition = true;
           } else if (effectTime < 2000) {
             // 0.5초간 서서히 강화 (30% → 100%)
             const rampTime = effectTime - 1500;
             globalIntensity = 0.3 + (rampTime / 500) * 0.7;
-            isInTransition = true;
+            // isInTransition = true;
           } else if (effectTime < 3500) {
             // 1.5초간 강한 효과 유지 (100%)
             globalIntensity = 1.0;
-            isInTransition = true;
+            // isInTransition = true;
           } else if (effectTime < 4500) {
             // 1초간: 강한 효과 → 중간 효과로 점진적 감소 (100% → 50%)
             const fadeTime = effectTime - 3500;
             const fadeProgress = fadeTime / 1000;
             // 사인 곡선으로 부드럽게 감소
             globalIntensity = 1.0 - (Math.sin(fadeProgress * Math.PI * 0.5) * 0.5);
-            isInTransition = true;
+            // isInTransition = true;
           } else if (effectTime < 5500) {
             // 1초간: 중간 효과 → 약한 효과로 (50% → 20%)
             const midFadeTime = effectTime - 4500;
             const midFadeProgress = midFadeTime / 1000;
             globalIntensity = 0.5 - (midFadeProgress * 0.3);
-            isInTransition = true;
+            // isInTransition = true;
           } else if (effectTime < 7000) {
             // 1.5초간: 약한 효과 → 거의 없음 (20% → 5%)
             const weakFadeTime = effectTime - 5500;
             const weakFadeProgress = weakFadeTime / 1500;
             globalIntensity = 0.2 - (weakFadeProgress * 0.15);
-            isInTransition = true;
+            // isInTransition = true;
           } else if (effectTime < 8000) {
             // 1초간: 마지막 미세한 잔향 (5% → 0%)
             const finalFadeTime = effectTime - 7000;
             const finalFadeProgress = finalFadeTime / 1000;
             globalIntensity = 0.05 * (1 - finalFadeProgress);
-            isInTransition = true;
+            // isInTransition = true;
           }
         }
       }
@@ -190,7 +190,7 @@ export const CRTGlitchText: React.FC<CRTGlitchTextProps> = ({
         // 강력한 전기 스파크 효과 (극적인 수축과 팽창)
         const electricSparkProgress = (Math.sin(globalTime * 4.0) + Math.sin(globalTime * 3.2)) > 1.7 ? 
           ((Math.sin(globalTime * 4.0) + Math.sin(globalTime * 3.2)) - 1.7) / 0.3 : 0;
-        const electricSparkDistortion = electricSparkProgress * intensity * 25;
+        // const electricSparkDistortion = electricSparkProgress * intensity * 25;
           
         // 전기적 스파이크 - 위아래 강조 (복원 중에는 확률 감소)
         const spikeChance = intensity < 1.0 ? intensity * intensity : 1.0; // 제곱으로 더 빠르게 감소

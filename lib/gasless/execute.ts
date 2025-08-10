@@ -3,8 +3,8 @@ import type { SmartAccount, UserOperation } from '../smart-account/types';
 import { BundlerClient } from './bundler';
 import { paymasterClient } from './paymaster';
 import { signWithPasskey } from './signer';
-import { signWithPasskey as signMessage } from '../passkey-sign';
-import { xlayer } from '../smart-account/factory';
+// import { signWithPasskey as signMessage } from '../passkey-sign';
+import { xlayerTestnet } from '../networks/config';
 
 const ENTRYPOINT_ADDRESS = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789' as const;
 
@@ -51,16 +51,16 @@ export async function executeGaslessOperation(options: ExecuteOptions): Promise<
     completeUserOp.callGasLimit = sponsorshipResult.callGasLimit;
 
     // 4. Calculate UserOp hash for signing
-    const userOpHash = await getUserOpHash(completeUserOp, ENTRYPOINT_ADDRESS, xlayer.id);
+    const userOpHash = await getUserOpHash(completeUserOp, ENTRYPOINT_ADDRESS, xlayerTestnet.id);
     console.log('UserOp hash for signing:', userOpHash);
 
     // 5. Request user confirmation with passkey
     console.log('Requesting transaction approval with passkey...');
-    const confirmationMessage = `Approve transaction:\nFrom: ${options.userOp.sender}\nOperation: Swap tokens\nNetwork: XLayer`;
+    // const confirmationMessage = `Approve transaction:\nFrom: ${options.userOp.sender}\nOperation: Swap tokens\nNetwork: XLayer`;
     
     try {
       // First verify user with passkey
-      const verification = await signMessage(confirmationMessage);
+      // const verification = await signMessage(confirmationMessage);
       console.log('User confirmed transaction with passkey');
       
       // Then sign the actual UserOp

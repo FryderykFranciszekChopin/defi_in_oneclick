@@ -43,7 +43,7 @@ export async function createPasskey(email: string): Promise<PasskeyData> {
     user: {
       id: btoa(email),
       name: email,
-      displayName: email.split('@')[0],
+      displayName: email.split('@')[0] || email,
     },
     pubKeyCredParams: [
       { alg: -7, type: 'public-key' }, // ES256
@@ -184,37 +184,22 @@ export async function authenticateWithPasskey(email?: string): Promise<PasskeyDa
     
     // If no stored data but we got a credential (re-authentication case)
     if (!passkeyData && credential && email) {
-      // Extract public key from the credential response
-      let publicKeyHex = '';
-      
-      try {
-        if (credential.response.publicKey) {
-          const publicKeyBuffer = Buffer.from(credential.response.publicKey, 'base64');
-          const publicKeyArray = new Uint8Array(publicKeyBuffer);
-          
-          // Parse COSE key format to extract x,y coordinates
-          // This is simplified - actual COSE parsing would be more complex
-          const x = publicKeyArray.slice(-64, -32);
-          const y = publicKeyArray.slice(-32);
-          
-          publicKeyHex = '0x' + Array.from(x).map(b => b.toString(16).padStart(2, '0')).join('') + 
-                         Array.from(y).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-      } catch (error) {
-        console.error('Failed to extract public key from re-authentication:', error);
-        // Generate deterministic key as fallback
-        const encoder = new TextEncoder();
-        const data = encoder.encode(credential.id);
-        const hash = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = new Uint8Array(hash);
-        const x = hashArray.slice(0, 32);
-        const y = new Uint8Array(32);
-        await crypto.subtle.digest('SHA-256', x).then(result => {
-          y.set(new Uint8Array(result).slice(0, 32));
-        });
-        publicKeyHex = '0x' + Array.from(x).map(b => b.toString(16).padStart(2, '0')).join('') + 
+      // Generate deterministic public key from credential ID
+      // Note: assertion responses don't contain public keys, only registration does
+      console.log('Re-authenticating - generating deterministic key from credential ID');
+      const encoder = new TextEncoder();
+      const data = encoder.encode(credential.id);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = new Uint8Array(hash);
+      const x = hashArray.slice(0, 32);
+      const y = new Uint8Array(32);
+      await crypto.subtle.digest('SHA-256', x).then(result => {
+        y.set(new Uint8Array(result).slice(0, 32));
+      });
+      const publicKeyHex = '0x' + Array.from(x).map(b => b.toString(16).padStart(2, '0')).join('') + 
                        Array.from(y).map(b => b.toString(16).padStart(2, '0')).join('');
-      }
+      
+      console.log('Generated deterministic publicKey:', publicKeyHex);
       
       const newPasskeyData: PasskeyData = {
         id: credential.id,

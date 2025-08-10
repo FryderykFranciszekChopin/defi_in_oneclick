@@ -17,7 +17,7 @@ const XLAYER_TOKENS: Token[] = [
     decimals: 18, 
     name: 'OKB', 
     logoURI: 'https://cdn.jsdelivr.net/gh/Uniswap/assets@master/blockchains/ethereum/assets/0x75231F58b43240C9718Dd58B4967c5114342a86c/logo.png', 
-    chainId: 196 
+    chainId: '196' 
   },
   { 
     symbol: 'USDT', 
@@ -25,7 +25,7 @@ const XLAYER_TOKENS: Token[] = [
     decimals: 6, 
     name: 'Tether USD', 
     logoURI: 'https://cdn.jsdelivr.net/gh/Uniswap/assets@master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png', 
-    chainId: 196 
+    chainId: '196' 
   },
   { 
     symbol: 'USDC', 
@@ -33,7 +33,7 @@ const XLAYER_TOKENS: Token[] = [
     decimals: 6, 
     name: 'USD Coin', 
     logoURI: 'https://cdn.jsdelivr.net/gh/Uniswap/assets@master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png', 
-    chainId: 196 
+    chainId: '196' 
   },
   { 
     symbol: 'WETH', 
@@ -41,7 +41,7 @@ const XLAYER_TOKENS: Token[] = [
     decimals: 18, 
     name: 'Wrapped Ether', 
     logoURI: 'https://cdn.jsdelivr.net/gh/Uniswap/assets@master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png', 
-    chainId: 196 
+    chainId: '196' 
   },
 ];
 

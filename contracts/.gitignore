@@ -1,0 +1,32 @@
+# Hardhat files
+cache
+artifacts
+typechain
+typechain-types
+
+# Foundry files
+out
+cache_forge
+
+# Environment
+.env
+.env.local
+
+# Dependencies
+node_modules
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage
+coverage.json
+
+# Deployments (keep the folder but not the contents)
+deployments/*
+!deployments/.gitkeep

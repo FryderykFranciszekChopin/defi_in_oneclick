@@ -1,0 +1,63 @@
+{
+  "name": "oneclick-defi",
+  "version": "1.0.0",
+  "description": "Email to DeFi in One Click - OKX Hackathon Project",
+  "scripts": {
+    "dev": "next dev -p 3500 -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start -p 3500",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "test": "echo \"No tests yet\" && exit 0",
+    "clean": "rm -rf .next out",
+    "analyze": "ANALYZE=true next build",
+    "contracts:compile": "cd contracts && npm run compile",
+    "contracts:deploy": "cd contracts && npm run deploy",
+    "contracts:deploy:mainnet": "cd contracts && npm run deploy:mainnet",
+    "contracts:deploy:verify": "cd contracts && npm run deploy:verify",
+    "contracts:deploy:verify:mainnet": "cd contracts && npm run deploy:verify:mainnet",
+    "contracts:test": "cd contracts && npm test"
+  },
+  "keywords": [
+    "defi",
+    "web3",
+    "passkey",
+    "okx",
+    "dex"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.10.0",
+    "@prisma/client": "^6.13.0",
+    "@simplewebauthn/browser": "^13.1.2",
+    "@simplewebauthn/server": "^13.1.2",
+    "@tanstack/react-query": "^5.83.0",
+    "@types/node": "^24.1.0",
+    "@types/nodemailer": "^6.4.17",
+    "@types/three": "^0.178.1",
+    "@web3auth/base": "^9.7.0",
+    "@web3auth/web3auth-wagmi-connector": "^7.0.0",
+    "autoprefixer": "^10.4.21",
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
+    "next": "^14.2.3",
+    "next-auth": "^4.24.11",
+    "nodemailer": "^7.0.5",
+    "postcss": "^8.5.6",
+    "prisma": "^6.13.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.17",
+    "three": "^0.178.0",
+    "typescript": "^5.8.3",
+    "viem": "^2.33.1",
+    "wagmi": "^2.16.0",
+    "zod": "^4.0.14"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7"
+  }
+}

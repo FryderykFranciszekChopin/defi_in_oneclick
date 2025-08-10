@@ -1,0 +1,306 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { SwapInterface } from './SwapInterface';
+import { AdvancedSwapInterface } from './AdvancedSwapInterface';
+import { formatAddress } from '@/lib/utils';
+import { signOut } from 'next-auth/react';
+import { useAccount } from '@/hooks/useAccount';
+import { DashboardSkeleton, Skeleton } from './SkeletonLoader';
+import { useTheme } from './ThemeProvider';
+
+interface DashboardProps {
+  account: any;
+}
+
+export function Dashboard({ account: initialAccount }: DashboardProps) {
+  const { account, balance, tokens, isLoading, error, refreshBalance } = useAccount();
+  const { theme, toggleTheme, mounted } = useTheme();
+  const [txHistory, setTxHistory] = useState<any[]>([]);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [activeTab, setActiveTab] = useState<'swap' | 'portfolio' | 'history'>('swap');
+
+  const handleLogout = async () => {
+    // Don't clear the passkey - keep it for next login on same device
+    // Only clear the session
+    await signOut({ 
+      redirect: true,
+      callbackUrl: '/'
+    });
+  };
+
+  const displayAccount = account || initialAccount;
+  
+  // Validate that we have a proper account
+  if (!displayAccount || !displayAccount.address || !displayAccount.email) {
+    // Redirect back to login if no valid account
+    handleLogout();
+    return null;
+  }
+
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-black dark:to-purple-950 transition-colors duration-300">
+      {/* Header */}
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 dark:from-blue-400/10 dark:to-purple-400/10"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-black bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 text-transparent bg-clip-text animate-gradient">
+                OneClick DeFi
+              </h1>
+              <span className="hidden sm:block px-3 py-1 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                XLayer Network
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                  {formatAddress(displayAccount.address)}
+                </span>
+              </div>
+              
+              {mounted && (
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all shadow-lg border border-gray-200 dark:border-gray-700"
+                  aria-label="Toggle theme"
+                >
+                  {theme === 'light' ? (
+                    <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" 
+                      />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" 
+                      />
+                    </svg>
+                  )}
+                </button>
+              )}
+              
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 rounded-xl transition-all transform hover:scale-105 shadow-lg"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Tab Navigation */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <nav className="flex space-x-1 bg-gradient-to-r from-gray-100/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-900/80 p-1 rounded-2xl backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+          {(['swap', 'portfolio', 'history'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 py-3 px-6 rounded-xl font-medium transition-all capitalize ${
+                activeTab === tab
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg transform scale-[1.02]'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-800/50'
+              }`}
+            >
+              {tab === 'swap' && '🔄 '}
+              {tab === 'portfolio' && '💼 '}
+              {tab === 'history' && '📈 '}
+              {tab}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Account Overview */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Balance Card */}
+            <div className="relative bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl p-6 shadow-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+              <div className="relative z-10">
+                <h2 className="text-lg font-semibold text-white/90 mb-4 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-white/20 backdrop-blur-xl rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                  Total Balance
+                </h2>
+                
+                {isLoading && !balance ? (
+                  <Skeleton width="100%" height={40} className="mb-2" />
+                ) : (
+                  <div className="text-4xl font-black text-white mb-2">
+                    ${balance || '0.00'}
+                  </div>
+                )}
+                
+              </div>
+              
+              {/* Decorative elements */}
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-600/30 rounded-full blur-2xl"></div>
+            </div>
+
+            {/* Token List */}
+            <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-xl border border-gray-200 dark:border-gray-800 hover:shadow-2xl transition-all">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center justify-between">
+                Your Tokens
+                <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-lg">XLayer</span>
+              </h3>
+              <div className="space-y-3">
+                {tokens?.map((token: any) => (
+                  <div key={token.symbol} className="flex items-center justify-between p-4 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-700 rounded-2xl transition-all cursor-pointer group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold shadow-md group-hover:scale-110 transition-transform">
+                        {token.symbol[0]}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{token.symbol}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{token.name}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold text-gray-900 dark:text-white">{token.balance}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">${token.value}</div>
+                    </div>
+                  </div>
+                )) || (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400 font-medium">No tokens yet</p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Start swapping to see your tokens</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Right Column - Main Interface */}
+          <div className="lg:col-span-2">
+            {activeTab === 'swap' && (
+              <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Swap Tokens
+                    </h2>
+                    <button
+                      onClick={() => setShowAdvanced(!showAdvanced)}
+                      className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                    >
+                      {showAdvanced ? 'Simple Mode' : 'Advanced Mode'}
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="p-6">
+                  {showAdvanced ? (
+                    <AdvancedSwapInterface account={displayAccount} />
+                  ) : (
+                    <SwapInterface account={displayAccount} />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'portfolio' && (
+              <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-xl border border-gray-200 dark:border-gray-800">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Portfolio Overview</h2>
+                <div className="space-y-6">
+                  {tokens && tokens.length > 0 ? (
+                    <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-2xl flex items-center justify-center">
+                      <span className="text-gray-500 dark:text-gray-400">Portfolio visualization will appear here</span>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-500 dark:text-gray-400 font-medium">No portfolio data</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Add tokens to see your portfolio</p>
+                    </div>
+                  )}
+                  
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Value</div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">${balance || '0.00'}</div>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Assets</div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{tokens?.length || 0}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'history' && (
+              <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-xl border border-gray-200 dark:border-gray-800">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Transaction History</h2>
+                <div className="space-y-4">
+                  {txHistory.length > 0 ? (
+                    txHistory.map((tx, i) => (
+                      <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            tx.type === 'swap' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'
+                          }`}>
+                            {tx.type === 'swap' ? '🔄' : '📤'}
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">{tx.title}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{tx.time}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium text-gray-900 dark:text-white">{tx.amount}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{tx.status}</div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-500 dark:text-gray-400 font-medium">No transactions yet</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">Your transaction history will appear here</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* Floating Action Button */}
+      <button className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full shadow-2xl flex items-center justify-center transform hover:scale-110 transition-all">
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        </svg>
+      </button>
+    </div>
+  );
+}

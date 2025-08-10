@@ -1,0 +1,20 @@
+{
+  "xlayer": {
+    "chainId": 196,
+    "entryPoint": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+    "factory": "0x0000000000000000000000000000000000000000",
+    "sessionKeyModule": "0x0000000000000000000000000000000000000000",
+    "deploymentBlock": 0,
+    "deploymentDate": "",
+    "deployer": ""
+  },
+  "xlayer_testnet": {
+    "chainId": 195,
+    "entryPoint": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+    "factory": "0x0000000000000000000000000000000000000000",
+    "sessionKeyModule": "0x0000000000000000000000000000000000000000",
+    "deploymentBlock": 0,
+    "deploymentDate": "",
+    "deployer": ""
+  }
+}

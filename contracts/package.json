@@ -1,0 +1,23 @@
+{
+  "name": "oneclick-defi-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for OneClick DeFi",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js --network xlayerTestnet",
+    "deploy:mainnet": "hardhat run scripts/deploy.js --network xlayer",
+    "deploy:verify": "hardhat run scripts/deploy-with-verification.js --network xlayerTestnet",
+    "deploy:verify:mainnet": "hardhat run scripts/deploy-with-verification.js --network xlayer",
+    "verify": "hardhat verify",
+    "clean": "hardhat clean",
+    "forge:build": "forge build",
+    "forge:test": "forge test",
+    "forge:deploy": "forge script foundry-scripts/Deploy.s.sol:DeployScript --rpc-url $XLAYER_TESTNET_RPC_URL --private-key $PRIVATE_KEY --broadcast"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "dotenv": "^16.3.1",
+    "hardhat": "^2.19.0"
+  }
+}

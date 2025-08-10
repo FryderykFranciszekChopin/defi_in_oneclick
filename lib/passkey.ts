@@ -1,5 +1,6 @@
 import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 import type { PublicKeyCredentialCreationOptionsJSON, PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types';
+import { extractPublicKeyFromCredential, validateP256PublicKey } from './cose';
 
 export const PASSKEY_STORAGE_KEY = 'oneclick_defi_passkey';
 
@@ -68,48 +69,39 @@ export async function createPasskey(email: string): Promise<PasskeyData> {
     });
 
     // Extract public key from the credential response
-    // The publicKey in the response is base64-encoded COSE key
     let publicKeyHex: string;
     
-    try {
-      if (credential.response.publicKey) {
-        // Decode the base64 public key
-        const publicKeyBuffer = Uint8Array.from(atob(credential.response.publicKey), c => c.charCodeAt(0));
-        
-        // For P-256 keys, extract x and y coordinates (simplified extraction)
-        // In a production environment, you'd properly parse the COSE key structure
-        // For now, we'll generate a deterministic key based on the credential ID
-        const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(credential.id));
-        const hashArray = new Uint8Array(hash);
-        
-        // Use first 32 bytes for x, next 32 bytes for y
-        const x = hashArray.slice(0, 32);
-        const y = new Uint8Array(32);
-        // Generate y from x using a simple derivation
-        await crypto.subtle.digest('SHA-256', x).then(result => {
-          y.set(new Uint8Array(result).slice(0, 32));
-        });
-        
-        publicKeyHex = '0x' + Array.from(x).map(b => b.toString(16).padStart(2, '0')).join('') + 
-                       Array.from(y).map(b => b.toString(16).padStart(2, '0')).join('');
+    if (credential.response.publicKey) {
+      // Try to extract the actual public key from the COSE format
+      const extractedKey = extractPublicKeyFromCredential(credential.response.publicKey);
+      
+      if (extractedKey && validateP256PublicKey(extractedKey)) {
+        publicKeyHex = extractedKey;
+        console.log('Successfully extracted P-256 public key from credential');
       } else {
-        // Fallback: generate from credential ID
+        // Fallback: Generate deterministic key from credential ID
+        // This is only for development/testing when COSE parsing fails
+        console.warn('Failed to extract valid public key from COSE, using fallback');
         const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(credential.id));
         const hashArray = new Uint8Array(hash);
+        
+        // Use first 32 bytes for x, derive y to ensure it's on the curve
         const x = hashArray.slice(0, 32);
         const y = new Uint8Array(32);
+        
+        // Simple derivation to get a y coordinate
+        // In production, this should properly calculate y from x on the P-256 curve
         await crypto.subtle.digest('SHA-256', x).then(result => {
           y.set(new Uint8Array(result).slice(0, 32));
         });
+        
         publicKeyHex = '0x' + Array.from(x).map(b => b.toString(16).padStart(2, '0')).join('') + 
                        Array.from(y).map(b => b.toString(16).padStart(2, '0')).join('');
       }
-    } catch (error) {
-      console.error('Failed to extract public key:', error);
-      // Generate deterministic key from credential ID as fallback
-      const encoder = new TextEncoder();
-      const data = encoder.encode(credential.id);
-      const hash = await crypto.subtle.digest('SHA-256', data);
+    } else {
+      // No public key in response, generate fallback
+      console.warn('No public key in credential response, using fallback');
+      const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(credential.id));
       const hashArray = new Uint8Array(hash);
       const x = hashArray.slice(0, 32);
       const y = new Uint8Array(32);

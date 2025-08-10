@@ -89,14 +89,14 @@ export async function signWithPasskey(userOpHash: Hex, credentialId: string): Pr
 
 function encodePasskeySignature(data: PasskeySignatureData): Hex {
   // Encode according to OneClickAccount contract's expected format
+  // (bytes authenticatorData, string clientDataJSON, uint256 challengeIndex, uint256 typeIndex, uint256 r, uint256 s)
   const encoded = encodeAbiParameters(
-    parseAbiParameters('bytes, string, uint256, uint256, string, uint256, uint256'),
+    parseAbiParameters('bytes, string, uint256, uint256, uint256, uint256'),
     [
       data.authenticatorData,
       data.clientDataJSON,
       BigInt(data.challengeIndex),
       BigInt(data.typeIndex),
-      data.userHandle,
       data.r,
       data.s,
     ]

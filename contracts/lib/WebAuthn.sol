@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./EllipticCurve.sol";
+
 /**
  * @title WebAuthn
  * @notice Library for verifying WebAuthn/Passkey signatures
@@ -74,22 +76,7 @@ library WebAuthn {
      * @dev Check if a point is on the P256 curve
      */
     function isOnCurve(uint256 x, uint256 y) internal pure returns (bool) {
-        if (x >= P256_P || y >= P256_P) {
-            return false;
-        }
-        
-        uint256 lhs = mulmod(y, y, P256_P);
-        uint256 rhs = addmod(
-            addmod(
-                mulmod(mulmod(x, x, P256_P), x, P256_P),
-                mulmod(P256_A, x, P256_P),
-                P256_P
-            ),
-            P256_B,
-            P256_P
-        );
-        
-        return lhs == rhs;
+        return EllipticCurve.isOnCurve(x, y);
     }
 
     /**
@@ -107,78 +94,9 @@ library WebAuthn {
         uint256 qx,
         uint256 qy
     ) internal pure returns (bool) {
-        // Calculate s^-1
-        uint256 sInv = modInverse(s, P256_N);
-        
-        // Calculate u1 = message * s^-1 mod n
-        uint256 u1 = mulmod(message, sInv, P256_N);
-        
-        // Calculate u2 = r * s^-1 mod n
-        uint256 u2 = mulmod(r, sInv, P256_N);
-        
-        // Calculate point R = u1*G + u2*Q
-        (uint256 rx,) = ecAdd(
-            ecMul(P256_GX, P256_GY, u1),
-            ecMul(qx, qy, u2)
-        );
-        
-        // Verify r == rx mod n
-        return r == (rx % P256_N);
+        return EllipticCurve.verifySignature(message, r, s, qx, qy);
     }
 
-    /**
-     * @dev Modular inverse using extended Euclidean algorithm
-     */
-    function modInverse(uint256 a, uint256 m) internal pure returns (uint256) {
-        if (a == 0) return 0;
-        
-        int256 lm = 1;
-        int256 hm = 0;
-        uint256 low = a % m;
-        uint256 high = m;
-        
-        while (low > 1) {
-            uint256 ratio = high / low;
-            int256 nm = hm - int256(ratio) * lm;
-            uint256 new_ = high - ratio * low;
-            
-            hm = lm;
-            lm = nm;
-            high = low;
-            low = new_;
-        }
-        
-        return uint256(lm + int256(m)) % m;
-    }
-
-    /**
-     * @dev Elliptic curve point multiplication (simplified)
-     * Note: In production, use a proper elliptic curve library
-     */
-    function ecMul(uint256 px, uint256 py, uint256 scalar) internal pure returns (uint256, uint256) {
-        // Simplified implementation - in production use double-and-add algorithm
-        if (scalar == 0) return (0, 0);
-        if (scalar == 1) return (px, py);
-        
-        // This is a placeholder - implement proper scalar multiplication
-        return (px, py);
-    }
-
-    /**
-     * @dev Elliptic curve point addition (simplified)
-     * Note: In production, use a proper elliptic curve library
-     */
-    function ecAdd(
-        uint256 px1, uint256 py1,
-        uint256 px2, uint256 py2
-    ) internal pure returns (uint256, uint256) {
-        // Handle identity cases
-        if (px1 == 0 && py1 == 0) return (px2, py2);
-        if (px2 == 0 && py2 == 0) return (px1, py1);
-        
-        // This is a placeholder - implement proper point addition
-        return (px1, py1);
-    }
 
     /**
      * @dev Check if a substring exists at a specific index
@@ -204,10 +122,62 @@ library WebAuthn {
     }
 
     /**
-     * @dev Base64 URL encode (simplified)
+     * @dev Base64 URL encode
      */
     function base64UrlEncode(bytes memory data) internal pure returns (string memory) {
-        // Simplified implementation - in production use proper base64url encoding
-        return string(data);
+        string memory TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+        
+        if (data.length == 0) return "";
+        
+        // Calculate encoded length
+        uint256 encodedLen = 4 * ((data.length + 2) / 3);
+        
+        // Add padding if necessary
+        uint256 padLen = data.length % 3;
+        if (padLen > 0) {
+            encodedLen -= (3 - padLen);
+        }
+        
+        bytes memory result = new bytes(encodedLen);
+        
+        uint256 dataPtr;
+        uint256 resultPtr;
+        
+        assembly {
+            dataPtr := add(data, 0x20)
+            resultPtr := add(result, 0x20)
+        }
+        
+        // Encode 3 bytes at a time
+        for (uint256 i = 0; i < data.length / 3; i++) {
+            uint256 chunk;
+            assembly {
+                chunk := mload(add(dataPtr, mul(i, 3)))
+            }
+            
+            uint256 a = (chunk >> 232) & 0xFF;
+            uint256 b = (chunk >> 224) & 0xFF;
+            uint256 c = (chunk >> 216) & 0xFF;
+            
+            result[i * 4] = bytes(TABLE)[a >> 2];
+            result[i * 4 + 1] = bytes(TABLE)[((a & 3) << 4) | (b >> 4)];
+            result[i * 4 + 2] = bytes(TABLE)[((b & 15) << 2) | (c >> 6)];
+            result[i * 4 + 3] = bytes(TABLE)[c & 63];
+        }
+        
+        // Handle remaining bytes
+        if (padLen == 1) {
+            uint256 a = uint256(uint8(data[data.length - 1]));
+            result[encodedLen - 2] = bytes(TABLE)[a >> 2];
+            result[encodedLen - 1] = bytes(TABLE)[(a & 3) << 4];
+        } else if (padLen == 2) {
+            uint256 a = uint256(uint8(data[data.length - 2]));
+            uint256 b = uint256(uint8(data[data.length - 1]));
+            result[encodedLen - 3] = bytes(TABLE)[a >> 2];
+            result[encodedLen - 2] = bytes(TABLE)[((a & 3) << 4) | (b >> 4)];
+            result[encodedLen - 1] = bytes(TABLE)[(b & 15) << 2];
+        }
+        
+        return string(result);
     }
 }

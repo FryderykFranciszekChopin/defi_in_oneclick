@@ -8,17 +8,45 @@ import { signOut } from 'next-auth/react';
 import { useAccount } from '@/hooks/useAccount';
 import { DashboardSkeleton, Skeleton } from './SkeletonLoader';
 import { useTheme } from './ThemeProvider';
+import { getDefaultTokens, type Token } from '@/lib/tokens';
 
 interface DashboardProps {
   account: any;
 }
 
 export function Dashboard({ account: initialAccount }: DashboardProps) {
-  const { account, balance, tokens, isLoading, error, refreshBalance } = useAccount();
+  const { account, balance, isLoading, error, refreshBalance } = useAccount();
   const { theme, toggleTheme, mounted } = useTheme();
+  const [tokens, setTokens] = useState<Token[]>([]);
   const [txHistory, setTxHistory] = useState<any[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [activeTab, setActiveTab] = useState<'swap' | 'portfolio' | 'history'>('swap');
+  
+  // Load tokens on mount
+  useEffect(() => {
+    // Load default tokens with mock balances
+    const defaultTokens = getDefaultTokens(195); // XLayer testnet
+    const tokensWithBalance = defaultTokens.map(token => ({
+      ...token,
+      balance: '0.00',
+      value: '0.00'
+    }));
+    
+    // Add some mock balances for demo
+    if (tokensWithBalance.length > 0) {
+      tokensWithBalance[0].balance = '10.5'; // OKB
+      tokensWithBalance[0].value = '525.00';
+      if (tokensWithBalance.length > 1) {
+        tokensWithBalance[1].balance = '100.00'; // USDC
+        tokensWithBalance[1].value = '100.00';
+      }
+      if (tokensWithBalance.length > 2) {
+        tokensWithBalance[2].balance = '50.00'; // USDT
+        tokensWithBalance[2].value = '50.00';
+      }
+    }
+    setTokens(tokensWithBalance);
+  }, []);
 
   const handleLogout = async () => {
     // Don't clear the passkey - keep it for next login on same device
@@ -161,8 +189,28 @@ export function Dashboard({ account: initialAccount }: DashboardProps) {
                 {tokens?.map((token: any) => (
                   <div key={token.symbol} className="flex items-center justify-between p-4 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-700 rounded-2xl transition-all cursor-pointer group">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold shadow-md group-hover:scale-110 transition-transform">
-                        {token.symbol[0]}
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform overflow-hidden bg-white dark:bg-gray-800">
+                        {token.logoURI ? (
+                          <img 
+                            src={token.logoURI} 
+                            alt={token.symbol}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback to first letter if image fails
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.className = 'w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold shadow-md group-hover:scale-110 transition-transform';
+                                parent.innerHTML = token.symbol[0];
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                            {token.symbol[0]}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <div className="font-semibold text-gray-900 dark:text-white">{token.symbol}</div>

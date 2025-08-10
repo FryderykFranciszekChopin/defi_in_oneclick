@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./EllipticCurve.sol";
+
 /**
  * @title P256Verifier
  * @notice Simplified P256 signature verification using precompile
@@ -42,9 +44,8 @@ library P256Verifier {
             }
         }
         
-        // Fallback: For demo/testing, accept signature if r,s are non-zero
-        // In production, implement proper P256 verification or require precompile
-        return r != 0 && s != 0 && qx != 0 && qy != 0;
+        // Fallback: Use EllipticCurve library for verification
+        return EllipticCurve.verifySignature(uint256(hash), r, s, qx, qy);
     }
     
     /**
